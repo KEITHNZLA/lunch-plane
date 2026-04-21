@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Static file server",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["/tmp/tt-serve.py"],
+      "port": 3000
+    }
+  ]
+}
