@@ -507,7 +507,7 @@ function RevealScreen({ result, onHome, onCal, onShare }) {
           <Ticket student={result.student} county={result.county} idx={COLLEGE_DAYS.indexOf(result.date)+1}/>
         </div>
         <div style={{padding:'8px 24px 20px',display:'flex',gap:10}}>
-          <button onClick={onCal} style={{...S.paperBtn,background:'transparent',color:'#3a2a1a',border:'1px solid #8a6a4a'}}>go to ledger</button>
+          <button onClick={onCal} style={{...S.paperBtn,background:'transparent',color:'#3a2a1a',border:'1px solid #8a6a4a'}}>Go to ledger</button>
         </div>
         <div style={{textAlign:'center',padding:'0 24px 20px'}}>
           <button onClick={onHome} style={{background:'transparent',border:'none',color:'#8a6a4a',fontFamily:'Lora,serif',fontStyle:'italic',fontSize:13,cursor:'pointer'}}>← back to front page</button>
@@ -636,7 +636,7 @@ function GraduationScreen({ state, onHome }) {
 
 // NAV
 function Nav({ screen, setScreen, allDone }) {
-  const items = [{k:'home',l:'Today'},{k:'ledger',l:'Ledger'},{k:'map',l:'Map'}];
+  const items = [{k:'home',l:'Today'},{k:'ledger',l:'Ledger'}];
   if (allDone) items.push({k:'graduation',l:'Diploma'});
   return (
     <div style={S.nav}>
@@ -822,7 +822,6 @@ function App() {
       {screen==='spin' && <SpinScreen rolling={rolling} animS={animS} animC={animC} onStart={spin} hasSpun={!!animS} landed={landed}/>}
       {screen==='reveal' && <RevealScreen result={lastResult} onHome={() => setScreen('home')} onCal={() => setScreen('ledger')} onShare={share}/>}
       {screen==='ledger' && <LedgerScreen state={state} currentDay={currentDay}/>}
-      {screen==='map' && <MapScreen usedCounties={usedCounties}/>}
       {screen==='graduation' && <GraduationScreen state={state} onHome={() => setScreen('home')}/>}
       {settings.showTweaks && <Tweaks settings={settings} setSettings={setSettings} onReset={resetAll}/>}
       {screen!=='spin' && <Nav screen={screen} setScreen={setScreen} allDone={allDone}/>}
