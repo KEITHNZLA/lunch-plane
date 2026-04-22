@@ -680,8 +680,8 @@ function Tweaks({ settings, setSettings, onReset }) {
 
 // STYLES
 const S = {
-  root: {height:'100%',minHeight:700,background:'#f4ede0',color:'#3a2a1a',fontFamily:'Lora,serif',position:'relative',overflow:'hidden'},
-  screen: {minHeight:700,paddingBottom:60},
+  root: {height:'100%',background:'#f4ede0',color:'#3a2a1a',fontFamily:'Lora,serif',display:'flex',flexDirection:'column'},
+  screen: {minHeight:'100%'},
   paperBg: {
     minHeight:700,
     backgroundImage:'repeating-linear-gradient(0deg, rgba(139,102,68,0.03) 0px, rgba(139,102,68,0.03) 1px, transparent 1px, transparent 4px), radial-gradient(ellipse at top, rgba(255,248,234,0.8) 0%, transparent 70%)',
@@ -721,7 +721,7 @@ const S = {
   ledgerIdx: {fontFamily:'Playfair Display,serif',fontStyle:'italic',fontSize:12,color:'#8a6a4a',width:26},
   ledgerDate: {width:40,textAlign:'center'},
   ledgerChip: {fontFamily:'Playfair Display,serif',fontSize:12,padding:'4px 10px',border:'1px solid #8a6a4a',background:'rgba(255,255,255,0.3)',color:'#3a2a1a',borderRadius:2},
-  nav: {position:'absolute',bottom:0,left:0,right:0,display:'flex',background:'#fff8ea',borderTop:'1.5px solid #3a2a1a'},
+  nav: {display:'flex',background:'#fff8ea',borderTop:'1.5px solid #3a2a1a',flexShrink:0},
   navBtn: {flex:1,padding:'12px 0',background:'transparent',border:'none',fontFamily:'Playfair Display,serif',fontStyle:'italic',fontSize:14,cursor:'pointer'},
   tweaks: {position:'absolute',top:60,right:12,width:220,background:'#fff8ea',border:'1.5px solid #3a2a1a',borderRadius:4,padding:12,zIndex:500,boxShadow:'2px 2px 0 #3a2a1a'},
   tweakFab: {position:'absolute',top:54,right:12,width:36,height:36,borderRadius:2,background:'#fff8ea',border:'1.5px solid #3a2a1a',cursor:'pointer',fontSize:16,zIndex:500,color:'#3a2a1a',boxShadow:'2px 2px 0 #3a2a1a'}
@@ -818,12 +818,14 @@ function App() {
 
   return (
     <div style={S.root}>
-      {screen==='home' && <HomeScreen state={state} remaining={remaining} currentDay={currentDay} onSpin={goSpin} settings={settings} allDone={allDone} onGrad={() => setScreen('graduation')}/>}
-      {screen==='spin' && <SpinScreen rolling={rolling} animS={animS} animC={animC} onStart={spin} hasSpun={!!animS} landed={landed}/>}
-      {screen==='reveal' && <RevealScreen result={lastResult} onHome={() => setScreen('home')} onCal={() => setScreen('ledger')} onShare={share}/>}
-      {screen==='ledger' && <LedgerScreen state={state} currentDay={currentDay}/>}
-      {screen==='graduation' && <GraduationScreen state={state} onHome={() => setScreen('home')}/>}
-      {settings.showTweaks && <Tweaks settings={settings} setSettings={setSettings} onReset={resetAll}/>}
+      <div style={{flex:1,overflowY:'auto',WebkitOverflowScrolling:'touch'}}>
+        {screen==='home' && <HomeScreen state={state} remaining={remaining} currentDay={currentDay} onSpin={goSpin} settings={settings} allDone={allDone} onGrad={() => setScreen('graduation')}/>}
+        {screen==='spin' && <SpinScreen rolling={rolling} animS={animS} animC={animC} onStart={spin} hasSpun={!!animS} landed={landed}/>}
+        {screen==='reveal' && <RevealScreen result={lastResult} onHome={() => setScreen('home')} onCal={() => setScreen('ledger')} onShare={share}/>}
+        {screen==='ledger' && <LedgerScreen state={state} currentDay={currentDay}/>}
+        {screen==='graduation' && <GraduationScreen state={state} onHome={() => setScreen('home')}/>}
+        {settings.showTweaks && <Tweaks settings={settings} setSettings={setSettings} onReset={resetAll}/>}
+      </div>
       {screen!=='spin' && <Nav screen={screen} setScreen={setScreen} allDone={allDone}/>}
     </div>
   );
