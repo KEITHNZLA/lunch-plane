@@ -645,7 +645,7 @@ function Nav({ screen, setScreen, allDone }) {
           ...S.navBtn,
           color: screen===it.k?'#b33c20':'#8a6a4a',
           fontWeight: screen===it.k?700:500,
-          borderTop: screen===it.k?'2px solid #b33c20':'2px solid transparent'
+          borderBottom: screen===it.k?'2px solid #b33c20':'2px solid transparent'
         }}>{it.l}</button>
       ))}
     </div>
@@ -721,7 +721,7 @@ const S = {
   ledgerIdx: {fontFamily:'Playfair Display,serif',fontStyle:'italic',fontSize:12,color:'#8a6a4a',width:26},
   ledgerDate: {width:40,textAlign:'center'},
   ledgerChip: {fontFamily:'Playfair Display,serif',fontSize:12,padding:'4px 10px',border:'1px solid #8a6a4a',background:'rgba(255,255,255,0.3)',color:'#3a2a1a',borderRadius:2},
-  nav: {display:'flex',background:'#fff8ea',borderTop:'1.5px solid #3a2a1a',flexShrink:0,paddingBottom:'env(safe-area-inset-bottom)'},
+  nav: {display:'flex',background:'#fff8ea',borderBottom:'1.5px solid #3a2a1a',flexShrink:0},
   navBtn: {flex:1,padding:'12px 0',background:'transparent',border:'none',fontFamily:'Playfair Display,serif',fontStyle:'italic',fontSize:14,cursor:'pointer'},
   tweaks: {position:'absolute',top:60,right:12,width:220,background:'#fff8ea',border:'1.5px solid #3a2a1a',borderRadius:4,padding:12,zIndex:500,boxShadow:'2px 2px 0 #3a2a1a'},
   tweakFab: {position:'absolute',top:54,right:12,width:36,height:36,borderRadius:2,background:'#fff8ea',border:'1.5px solid #3a2a1a',cursor:'pointer',fontSize:16,zIndex:500,color:'#3a2a1a',boxShadow:'2px 2px 0 #3a2a1a'}
@@ -818,6 +818,7 @@ function App() {
 
   return (
     <div style={S.root}>
+      {screen!=='spin' && <Nav screen={screen} setScreen={setScreen} allDone={allDone}/>}
       <div style={{flex:1,overflowY:'auto',WebkitOverflowScrolling:'touch'}}>
         {screen==='home' && <HomeScreen state={state} remaining={remaining} currentDay={currentDay} onSpin={goSpin} settings={settings} allDone={allDone} onGrad={() => setScreen('graduation')}/>}
         {screen==='spin' && <SpinScreen rolling={rolling} animS={animS} animC={animC} onStart={spin} hasSpun={!!animS} landed={landed}/>}
@@ -826,7 +827,6 @@ function App() {
         {screen==='graduation' && <GraduationScreen state={state} onHome={() => setScreen('home')}/>}
         {settings.showTweaks && <Tweaks settings={settings} setSettings={setSettings} onReset={resetAll}/>}
       </div>
-      {screen!=='spin' && <Nav screen={screen} setScreen={setScreen} allDone={allDone}/>}
     </div>
   );
 }
