@@ -211,6 +211,41 @@
     font-weight: 700;
   }
 
+  /* Destination input */
+  .destination-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-family: 'MintGrotesk', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    transition: border-color 0.15s ease;
+    outline: none;
+  }
+
+  .destination-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .destination-input:focus {
+    border-color: var(--accent);
+  }
+
+  .passenger-destination {
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    margin-top: 1px;
+  }
+
+  .passenger-chip-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
   /* Board button */
   .board-btn {
     width: 100%;
@@ -540,6 +575,11 @@
       <div class="time-grid" id="time-grid"></div>
     </div>
 
+    <div class="field-group">
+      <div class="field-label">Where are you going?</div>
+      <input class="destination-input" id="destination-input" type="text" placeholder="e.g. Sweetgreen, the deli around the corner…" maxlength="60" />
+    </div>
+
     <button class="board-btn" id="board-btn" disabled onclick="handleBoard()">
       <span id="board-btn-icon">✈</span>
       <span id="board-btn-text">Select passenger &amp; time to board</span>
@@ -692,6 +732,7 @@ function getColor(name) {
 let selectedName = null;
 let selectedTime = null;
 let passengers = []; // kept in sync by the real-time listener below
+let selectedDestination = '';
 
 // ── Build UI grids ────────────────────────────────────────────────
 const nameGrid = document.getElementById('name-grid');
@@ -715,6 +756,10 @@ TIMES.forEach(t => {
 });
 
 // ── Selection handlers ────────────────────────────────────────────
+document.getElementById('destination-input').addEventListener('input', e => {
+  selectedDestination = e.target.value.trim();
+});
+
 function selectName(name) {
   selectedName = name;
   document.querySelectorAll('.name-btn').forEach(b => {
@@ -773,6 +818,7 @@ function handleBoard() {
     passengersRef().child(key).set({
       name: selectedName,
       time: selectedTime,
+      destination: selectedDestination,
       boardedAt: Date.now()
     });
   }
@@ -827,7 +873,10 @@ function renderPassengers() {
       const isYou = p.name === selectedName;
       chip.innerHTML = `
         <div class="passenger-avatar" style="background:${getColor(p.name)};color:#111">${getInitials(p.name)}</div>
-        <span class="passenger-name${isYou ? ' is-you' : ''}">${p.name}${isYou ? ' (you)' : ''}</span>
+        <div class="passenger-chip-inner">
+          <span class="passenger-name${isYou ? ' is-you' : ''}">${p.name}${isYou ? ' (you)' : ''}</span>
+          ${p.destination ? `<span class="passenger-destination">${p.destination}</span>` : ''}
+        </div>
       `;
       chips.appendChild(chip);
     });
