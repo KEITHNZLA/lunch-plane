@@ -1087,7 +1087,7 @@ function showAuthError(msg) {
   el.style.display = 'block';
 }
 
-function applyProfile(profile) {
+function applyProfile(profile, firebaseUser) {
   selectedName = profile.displayName;
   const av = document.getElementById('user-pill-avatar');
   av.textContent = getInitials(selectedName);
@@ -1098,13 +1098,12 @@ function applyProfile(profile) {
   updateBoardBtn();
 
   // PostHog: identify so events are linked to a real person
-  const firebaseUser = auth.currentUser;
   if (firebaseUser) {
     posthog.identify(firebaseUser.uid, {
       name: profile.displayName,
       email: firebaseUser.email,
     });
-  } else {
+  } else if (profile.guest) {
     // Guest — use their name as a stable-ish ID
     posthog.identify('guest_' + profile.displayName.toLowerCase().replace(/\s+/g, '_'), {
       name: profile.displayName,
@@ -1135,7 +1134,7 @@ auth.onAuthStateChanged(async (user) => {
     document.getElementById('setup-name-input').value = suggested;
     showAuthState('setup');
   } else {
-    applyProfile(snap.val());
+    applyProfile(snap.val(), user); // pass user so PostHog can identify properly
   }
 });
 
@@ -1201,7 +1200,7 @@ document.getElementById('setup-confirm-btn').addEventListener('click', async () 
   if (user) {
     await db.ref(`lunch-plane/users/${user.uid}/profile`).set({ displayName: name, setupAt: Date.now() });
   }
-  applyProfile({ displayName: name });
+  applyProfile({ displayName: name }, user); // pass user so PostHog can identify
 });
 
 function genTimes() {
