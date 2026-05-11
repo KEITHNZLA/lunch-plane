@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lunch Plane</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✈️</text></svg>">
 <style>
   @font-face {
     font-family: 'MintGrotesk';
@@ -544,9 +545,355 @@
       grid-template-columns: repeat(4, 1fr);
     }
   }
+
+  /* ── Auth overlay — dark themed ── */
+  .auth-overlay {
+    position: fixed;
+    inset: 0;
+    background: #1B1B1B;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .auth-overlay.done { display: none; }
+
+  #auth-overlay .auth-brand-icon {
+    background: var(--accent-green);
+    color: #1B1B1B;
+  }
+
+  #auth-overlay .auth-brand-name,
+  #auth-overlay .auth-card h2 {
+    color: #F4F2EC;
+  }
+
+  #auth-overlay .auth-card p {
+    color: rgba(244,242,236,0.5);
+  }
+
+  #auth-overlay .auth-loading-icon {
+    color: #F4F2EC;
+  }
+
+  #auth-overlay .google-btn {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(255,255,255,0.15);
+    color: #F4F2EC;
+  }
+  #auth-overlay .google-btn:hover {
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.28);
+    box-shadow: none;
+  }
+
+  #auth-overlay .guest-link {
+    color: rgba(244,242,236,0.35);
+  }
+  #auth-overlay .guest-link:hover { color: #F4F2EC; }
+
+  #auth-overlay .guest-back-btn {
+    color: rgba(244,242,236,0.35);
+  }
+  #auth-overlay .guest-back-btn:hover { color: #F4F2EC; }
+
+  #auth-overlay .setup-input {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(255,255,255,0.15);
+    color: #F4F2EC;
+  }
+  #auth-overlay .setup-input::placeholder {
+    color: rgba(244,242,236,0.3);
+  }
+  #auth-overlay .setup-input:focus {
+    border-color: var(--accent-green);
+  }
+
+  #auth-overlay .board-btn {
+    background: var(--accent-green);
+    color: #1B1B1B;
+  }
+  #auth-overlay .board-btn:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  #auth-overlay .auth-error {
+    background: rgba(220,50,50,0.15);
+    border-color: rgba(220,50,50,0.35);
+    color: #ff8a8a;
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 48px 40px;
+    text-align: center;
+    font-family: 'MintGrotesk', sans-serif;
+  }
+
+  .auth-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+
+  .auth-brand-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--accent-green);
+  }
+
+  .auth-brand-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .auth-card h2 {
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--text);
+    margin: 0 0 12px 0;
+    letter-spacing: -1px;
+    line-height: 1.1;
+  }
+
+  .auth-card p {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin: 0 0 24px 0;
+    line-height: 1.6;
+  }
+
+  .google-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'MintGrotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .google-btn:hover {
+    border-color: #aaa;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .google-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+  .guest-link {
+    background: none;
+    border: none;
+    font-family: 'MintGrotesk', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    margin-top: 14px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+  .guest-link:hover { color: var(--text); }
+
+  .guest-back-btn {
+    background: none;
+    border: none;
+    font-family: 'MintGrotesk', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    margin-top: 14px;
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+  .guest-back-btn:hover { color: var(--text); }
+
+  .auth-error {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: #FFF0F0;
+    border: 1px solid #FFCDD0;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: #C0392B;
+    text-align: left;
+    display: none;
+  }
+
+  .auth-loading-icon {
+    font-size: 48px;
+    animation: authPulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes authPulse {
+    0%, 100% { opacity: 0.25; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.1); }
+  }
+
+  .setup-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    font-family: 'MintGrotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    text-align: center;
+    outline: none;
+    margin-bottom: 16px;
+    transition: border-color 0.15s;
+  }
+
+  .setup-input:focus { border-color: var(--accent); }
+
+  /* User pill (replaces name grid) */
+  .user-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+  }
+
+  .user-pill-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    color: #111;
+    background: var(--accent-green);
+  }
+
+  .user-pill-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+
+  /* Sign-out in header */
+  .user-pill-actions {
+    display: none;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  .pill-action-btn {
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+  }
+
+  .pill-action-btn:hover {
+    color: var(--text);
+    background: var(--border);
+  }
+
+  .pill-action-btn svg {
+    width: 14px;
+    height: 14px;
+  }
 </style>
 </head>
 <body>
+
+<!-- ── Auth overlay — sits on top of everything until the user is signed in ── -->
+<div id="auth-overlay" class="auth-overlay">
+
+  <!-- Loading -->
+  <div id="auth-loading">
+    <div class="auth-loading-icon">✈</div>
+  </div>
+
+  <!-- Sign-in -->
+  <div id="auth-signin" class="auth-card" style="display:none">
+    <div class="auth-brand">
+      <div class="auth-brand-icon">✈</div>
+      <div class="auth-brand-name">Lunch Plane</div>
+    </div>
+    <h2>Welcome aboard.</h2>
+    <p>Sign in with your Planes Google account<br>to let the team know where you're headed.</p>
+    <button class="google-btn" id="google-sign-in-btn">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Continue with Google
+    </button>
+    <div id="auth-error" class="auth-error"></div>
+    <button class="guest-link" id="guest-link-btn">or continue as guest</button>
+  </div>
+
+  <!-- Guest name entry -->
+  <div id="auth-guest" class="auth-card" style="display:none">
+    <div class="auth-brand">
+      <div class="auth-brand-icon">✈</div>
+      <div class="auth-brand-name">Lunch Plane</div>
+    </div>
+    <h2>What's your name?</h2>
+    <p>Just visiting? Enter your name and you're on board.</p>
+    <input id="guest-name-input" class="setup-input" type="text" maxlength="30" placeholder="e.g. Alex" />
+    <button class="board-btn" id="guest-confirm-btn" style="width:100%">
+      <span>✈</span> <span>Continue as guest</span>
+    </button>
+    <button class="guest-back-btn" id="guest-back-btn">← Back</button>
+  </div>
+
+  <!-- First-login name setup -->
+  <div id="auth-setup" class="auth-card" style="display:none">
+    <div class="auth-brand">
+      <div class="auth-brand-icon">✈</div>
+      <div class="auth-brand-name">Lunch Plane</div>
+    </div>
+    <h2>What should we call you?</h2>
+    <p>We pulled this from your Google account —<br>update it if you go by a nickname.</p>
+    <input id="setup-name-input" class="setup-input" type="text" maxlength="30" />
+    <button class="board-btn" id="setup-confirm-btn" style="width:100%">
+      <span>✈</span> <span>Confirm and continue</span>
+    </button>
+    <button class="guest-back-btn" id="setup-back-btn">← Cancel</button>
+  </div>
+
+</div>
 
 <header>
   <div class="logo">
@@ -563,11 +910,29 @@
   <!-- LEFT: Booking -->
   <div class="booking-panel">
     <h1>Board the<br>Lunch Plane.</h1>
-    <p class="subtitle">Let the team know you're heading out for lunch — pick your name, choose a departure time, and we'll hold your seat.</p>
+    <p class="subtitle">Let the team know you're heading out for lunch — choose a departure time and we'll hold your seat.</p>
 
     <div class="field-group">
-      <div class="field-label">Passenger</div>
-      <div class="name-grid" id="name-grid"></div>
+      <div class="field-label">Flying as</div>
+      <div class="user-pill" id="user-pill">
+        <div class="user-pill-avatar" id="user-pill-avatar">—</div>
+        <span class="user-pill-name" id="user-pill-name">—</span>
+        <div class="user-pill-actions" id="user-pill-actions">
+          <button class="pill-action-btn" id="edit-name-btn" title="Edit name">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+          <button class="pill-action-btn" id="signout-btn" title="Sign out" onclick="handleSignOut()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="field-group">
@@ -653,6 +1018,7 @@
 <!-- Firebase Realtime Database SDK (compat v9 — no build step required) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
 <script>
 // ═══════════════════════════════════════════════════════════════════
@@ -690,14 +1056,133 @@ function nameToKey(name) {
   return name.replace(/[.#$[\]/\s]/g, '_');
 }
 
-// ── Static data ───────────────────────────────────────────────────
-const PEOPLE = [
-  "Andrico","Angus","Asti","Bart","Charlie","Charlotte","Chris","CJ",
-  "Daniel","Eli","Ella","Fiona","Gemma","Hannah","Henry",
-  "Jake","Joe","Jonathan","Josh","Julian","Kate","Katie",
-  "Keith","Mal","Micha","Nate","Oliver","Paulina","Rob","Rochelle",
-  "Ryan","Seamus","Sean","Sophie A","Sophie R","Tim","Yemi"
-];
+// ── Firebase Auth ─────────────────────────────────────────────────
+const auth           = firebase.auth();
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+const ALLOWED_DOMAIN = '@planes.agency';
+
+// Keep users signed in permanently — session survives closing/reopening the browser
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+// Hint Google's account picker to show @planes.agency accounts first
+googleProvider.setCustomParameters({ hd: 'planes.agency' });
+
+function showAuthState(state) {
+  document.getElementById('auth-loading').style.display = state === 'loading' ? '' : 'none';
+  document.getElementById('auth-signin').style.display  = state === 'signin'  ? '' : 'none';
+  document.getElementById('auth-setup').style.display   = state === 'setup'   ? '' : 'none';
+  document.getElementById('auth-guest').style.display   = state === 'guest'   ? '' : 'none';
+  const overlay = document.getElementById('auth-overlay');
+  if (state === 'done') overlay.classList.add('done');
+  else overlay.classList.remove('done');
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function applyProfile(profile) {
+  selectedName = profile.displayName;
+  const av = document.getElementById('user-pill-avatar');
+  av.textContent = getInitials(selectedName);
+  av.style.background = getColor(selectedName);
+  document.getElementById('user-pill-name').textContent = selectedName;
+  document.getElementById('user-pill-actions').style.display = 'flex';
+  showAuthState('done');
+  updateBoardBtn();
+}
+
+// Fires on every auth state change — including page load and after popup sign-in
+auth.onAuthStateChanged(async (user) => {
+  if (!user) { showAuthState('signin'); return; }
+
+  // Domain check
+  if (!user.email.endsWith(ALLOWED_DOMAIN)) {
+    await auth.signOut();
+    showAuthState('signin');
+    showAuthError('This app is for Planes staff only. Please sign in with your @planes.agency Google account.');
+    return;
+  }
+
+  // Check for stored display name preference
+  const profileRef = db.ref(`lunch-plane/users/${user.uid}/profile`);
+  const snap = await profileRef.once('value');
+
+  if (!snap.exists()) {
+    // First login — pre-fill from Google account name
+    const suggested = (user.displayName || '').split(' ')[0];
+    document.getElementById('setup-name-input').value = suggested;
+    showAuthState('setup');
+  } else {
+    applyProfile(snap.val());
+  }
+});
+
+async function handleSignOut() {
+  if (auth.currentUser) await auth.signOut();
+  selectedName = null;
+  selectedTime = null;
+  selectedDestination = '';
+  document.getElementById('user-pill-actions').style.display = 'none';
+  document.getElementById('destination-input').value = '';
+  document.querySelectorAll('.time-btn.selected').forEach(b => b.classList.remove('selected'));
+  updateBoardBtn();
+  showAuthState('signin');
+}
+
+document.getElementById('setup-back-btn').addEventListener('click', () => {
+  if (selectedName) showAuthState('done');
+  else showAuthState('signin');
+});
+
+document.getElementById('edit-name-btn').addEventListener('click', () => {
+  document.getElementById('setup-name-input').value = selectedName || '';
+  showAuthState('setup');
+});
+
+document.getElementById('guest-link-btn').addEventListener('click', () => {
+  document.getElementById('guest-name-input').value = '';
+  showAuthState('guest');
+  document.getElementById('guest-name-input').focus();
+});
+
+document.getElementById('guest-back-btn').addEventListener('click', () => {
+  showAuthState('signin');
+});
+
+function confirmGuest() {
+  const name = document.getElementById('guest-name-input').value.trim();
+  if (!name) return;
+  applyProfile({ displayName: name, guest: true });
+}
+document.getElementById('guest-confirm-btn').addEventListener('click', confirmGuest);
+document.getElementById('guest-name-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') confirmGuest();
+});
+
+document.getElementById('google-sign-in-btn').addEventListener('click', async () => {
+  document.getElementById('auth-error').style.display = 'none';
+  try {
+    await auth.signInWithPopup(googleProvider);
+    // onAuthStateChanged handles the rest
+  } catch (e) {
+    if (e.code !== 'auth/popup-closed-by-user') {
+      showAuthError('Sign-in failed. Please try again.');
+    }
+  }
+});
+
+document.getElementById('setup-confirm-btn').addEventListener('click', async () => {
+  const name = document.getElementById('setup-name-input').value.trim();
+  if (!name) return;
+  const user = auth.currentUser;
+  if (user) {
+    await db.ref(`lunch-plane/users/${user.uid}/profile`).set({ displayName: name, setupAt: Date.now() });
+  }
+  applyProfile({ displayName: name });
+});
 
 function genTimes() {
   const times = [];
@@ -734,17 +1219,7 @@ let selectedTime = null;
 let passengers = []; // kept in sync by the real-time listener below
 let selectedDestination = '';
 
-// ── Build UI grids ────────────────────────────────────────────────
-const nameGrid = document.getElementById('name-grid');
-PEOPLE.forEach(name => {
-  const btn = document.createElement('button');
-  btn.className = 'name-btn';
-  btn.textContent = name;
-  btn.dataset.name = name;
-  btn.onclick = () => selectName(name);
-  nameGrid.appendChild(btn);
-});
-
+// ── Build time grid ───────────────────────────────────────────────
 const timeGrid = document.getElementById('time-grid');
 TIMES.forEach(t => {
   const btn = document.createElement('button');
@@ -760,14 +1235,6 @@ document.getElementById('destination-input').addEventListener('input', e => {
   selectedDestination = e.target.value.trim();
 });
 
-function selectName(name) {
-  selectedName = name;
-  document.querySelectorAll('.name-btn').forEach(b => {
-    b.classList.toggle('selected', b.dataset.name === name);
-  });
-  updateBoardBtn();
-}
-
 function selectTime(t) {
   selectedTime = t;
   document.querySelectorAll('.time-btn').forEach(b => {
@@ -782,18 +1249,10 @@ function updateBoardBtn() {
   const text = document.getElementById('board-btn-text');
   const already = passengers.find(p => p.name === selectedName);
 
-  if (!selectedName && !selectedTime) {
+  if (!selectedName || !selectedTime) {
     btn.disabled = true; btn.className = 'board-btn';
     icon.textContent = '✈';
-    text.textContent = 'Select passenger & time to board';
-  } else if (!selectedName) {
-    btn.disabled = true; btn.className = 'board-btn';
-    icon.textContent = '✈';
-    text.textContent = 'Select your name to board';
-  } else if (!selectedTime) {
-    btn.disabled = true; btn.className = 'board-btn';
-    icon.textContent = '✈';
-    text.textContent = `${selectedName} — choose a departure time`;
+    text.textContent = selectedName ? 'Choose a departure time to board' : 'Sign in to board';
   } else if (already) {
     btn.disabled = false; btn.className = 'board-btn boarded';
     icon.textContent = '×';
