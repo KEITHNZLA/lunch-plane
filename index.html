@@ -1096,6 +1096,21 @@ function applyProfile(profile) {
   document.getElementById('user-pill-actions').style.display = 'flex';
   showAuthState('done');
   updateBoardBtn();
+
+  // PostHog: identify so events are linked to a real person
+  const firebaseUser = auth.currentUser;
+  if (firebaseUser) {
+    posthog.identify(firebaseUser.uid, {
+      name: profile.displayName,
+      email: firebaseUser.email,
+    });
+  } else {
+    // Guest — use their name as a stable-ish ID
+    posthog.identify('guest_' + profile.displayName.toLowerCase().replace(/\s+/g, '_'), {
+      name: profile.displayName,
+      is_guest: true,
+    });
+  }
 }
 
 // Fires on every auth state change — including page load and after popup sign-in
@@ -1125,6 +1140,7 @@ auth.onAuthStateChanged(async (user) => {
 });
 
 async function handleSignOut() {
+  posthog.reset(); // clears the identified user so the next person starts fresh
   if (auth.currentUser) await auth.signOut();
   selectedName = null;
   selectedTime = null;
@@ -1276,8 +1292,18 @@ function handleBoard() {
   const already = passengers.find(p => p.name === selectedName);
 
   if (already) {
+    posthog.capture('deboarded', {
+      name: selectedName,
+      time: already.time,
+      destination: already.destination || '',
+    });
     passengersRef().child(key).remove();
   } else {
+    posthog.capture('boarded', {
+      name: selectedName,
+      time: selectedTime,
+      destination: selectedDestination,
+    });
     passengersRef().child(key).set({
       name: selectedName,
       time: selectedTime,
