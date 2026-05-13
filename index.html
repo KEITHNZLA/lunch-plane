@@ -1090,8 +1090,8 @@ function showAuthError(msg) {
 function applyProfile(profile, firebaseUser) {
   selectedName = profile.displayName;
   const av = document.getElementById('user-pill-avatar');
-  av.textContent = getInitials(selectedName);
   av.style.background = getColor(selectedName);
+  av.innerHTML = avatarHTML(selectedName);
   document.getElementById('user-pill-name').textContent = selectedName;
   document.getElementById('user-pill-actions').style.display = 'flex';
   showAuthState('done');
@@ -1224,6 +1224,15 @@ const AVATAR_COLORS = [
 
 function getInitials(name) {
   return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+}
+
+function getPhotoUrl(name) {
+  return `photos/${name.toLowerCase()}.jpg`;
+}
+
+function avatarHTML(name, size) {
+  const s = size || 28;
+  return `<img src="${getPhotoUrl(name)}" alt="${name}" style="width:${s}px;height:${s}px;border-radius:50%;object-fit:cover;object-position:center top;" onerror="this.parentNode.dataset.fallback='1';this.remove();this.parentNode.textContent='${getInitials(name)}'">`;
 }
 
 function getColor(name) {
@@ -1360,7 +1369,7 @@ function renderPassengers() {
       chip.className = 'passenger-chip';
       const isYou = p.name === selectedName;
       chip.innerHTML = `
-        <div class="passenger-avatar" style="background:${getColor(p.name)};color:#111">${getInitials(p.name)}</div>
+        <div class="passenger-avatar" style="background:${getColor(p.name)};color:#111">${avatarHTML(p.name)}</div>
         <div class="passenger-chip-inner">
           <span class="passenger-name${isYou ? ' is-you' : ''}">${p.name}${isYou ? ' (you)' : ''}</span>
           ${p.destination ? `<span class="passenger-destination">${p.destination}</span>` : ''}
