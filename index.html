@@ -410,13 +410,15 @@
     width: 100%;
     height: 130px;
     border-radius: 0;
+    overflow: hidden;
+    flex-shrink: 0;
+    background-repeat: no-repeat;
+    /* initials fallback */
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 28px;
     font-weight: 700;
-    overflow: hidden;
-    flex-shrink: 0;
   }
 
   .passenger-avatar img {
@@ -1247,6 +1249,37 @@ const AVATAR_COLORS = [
   '#E9C46A','#90E0EF','#C77DFF','#F72585','#4CC9F0'
 ];
 
+// Per-person photo framing: { z = background-size%, p = background-position }
+// Default for standard studio full-body portraits: 220% zoom, face at ~15% from top
+const PHOTO_FRAME = {
+  // Already close-up — less zoom needed
+  'sean':      { z: '110%', p: 'center 15%' },
+  'rob':       { z: '130%', p: 'center 20%' },
+  'joe':       { z: '140%', p: 'center 20%' },
+  'daniel':    { z: '140%', p: 'center 20%' },
+  'micha':     { z: '120%', p: 'center 20%' },
+  'charlotte': { z: '160%', p: 'center 25%' },
+
+  // Action / lifestyle shots — need specific framing
+  'keith':     { z: '310%', p: 'center 5%'  },  // jumping on space hopper
+  'rochelle':  { z: '230%', p: '28% 32%'   },  // walking sideways past building
+  'angus':     { z: '450%', p: 'center 38%' },  // tiny figure in tree
+  'asti':      { z: '190%', p: 'center 12%' },  // holding fluffy dog outdoors
+  'charlie':   { z: '160%', p: 'center 10%' },  // outdoor selfie with red cap
+  'chris':     { z: '230%', p: 'center 28%' },  // in pool with donut ring
+  'fiona':     { z: '190%', p: 'center 15%' },  // with spaniel dog
+  'jemma':     { z: '160%', p: 'center 12%' },  // desert selfie
+  'zach':      { z: '260%', p: '50% 42%'   },  // illustrated / animated
+  'ryan':      { z: '260%', p: '38% 40%'   },  // non-standard photo
+};
+const FRAME_DEFAULT = { z: '220%', p: 'center 15%' };
+
+function cardAvatarBg(name) {
+  const key = name.toLowerCase();
+  const f = PHOTO_FRAME[key] || FRAME_DEFAULT;
+  return `background-color:${getColor(name)};background-image:url(photos/${key}.jpg);background-size:${f.z};background-position:${f.p};`;
+}
+
 function getInitials(name) {
   return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
 }
@@ -1391,7 +1424,7 @@ function renderPassengers() {
       chip.className = 'passenger-chip';
       const isYou = p.name === selectedName;
       chip.innerHTML = `
-        <div class="passenger-avatar" style="background:${getColor(p.name)};color:#111">${avatarHTML(p.name)}</div>
+        <div class="passenger-avatar" style="${cardAvatarBg(p.name)}"></div>
         <div class="passenger-chip-inner">
           <span class="passenger-name${isYou ? ' is-you' : ''}">${p.name}${isYou ? ' (you)' : ''}</span>
           ${p.destination ? `<span class="passenger-destination">${p.destination}</span>` : ''}
