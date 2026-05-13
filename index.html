@@ -638,6 +638,65 @@
     border-color: var(--accent-green);
   }
 
+  #auth-overlay .setup-photo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  #auth-overlay .setup-photo-preview {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 700;
+    flex-shrink: 0;
+    color: #111;
+  }
+  #auth-overlay .setup-photo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+  #auth-overlay .setup-photo-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  #auth-overlay .setup-photo-upload-btn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #F4F2EC;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'MintGrotesk', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  #auth-overlay .setup-photo-upload-btn:hover {
+    background: rgba(255,255,255,0.18);
+  }
+  #auth-overlay .setup-photo-remove-btn {
+    background: none;
+    border: none;
+    color: rgba(244,242,236,0.4);
+    font-size: 12px;
+    font-family: 'MintGrotesk', sans-serif;
+    cursor: pointer;
+    padding: 0;
+    text-align: left;
+    transition: color 0.15s;
+  }
+  #auth-overlay .setup-photo-remove-btn:hover {
+    color: rgba(244,242,236,0.7);
+  }
+
   #auth-overlay .board-btn {
     background: var(--accent-green);
     color: #1B1B1B;
@@ -915,6 +974,14 @@
     </div>
     <h2>What should we call you?</h2>
     <p>We pulled this from your Google account —<br>update it if you go by a nickname.</p>
+    <div class="setup-photo-wrap">
+      <div class="setup-photo-preview" id="setup-photo-preview"></div>
+      <div class="setup-photo-btns">
+        <button class="setup-photo-upload-btn" id="setup-photo-upload-btn">Upload photo</button>
+        <button class="setup-photo-remove-btn" id="setup-photo-remove-btn" style="display:none">Remove photo</button>
+      </div>
+      <input type="file" id="setup-photo-input" accept="image/*" style="display:none">
+    </div>
     <input id="setup-name-input" class="setup-input" type="text" maxlength="30" />
     <button class="board-btn" id="setup-confirm-btn" style="width:100%">
       <span>✈</span> <span>Confirm and continue</span>
@@ -1114,9 +1181,10 @@ function showAuthError(msg) {
 
 function applyProfile(profile, firebaseUser) {
   selectedName = profile.displayName;
+  selectedPhotoURL = profile.photoURL || null;
   const av = document.getElementById('user-pill-avatar');
   av.style.background = getColor(selectedName);
-  av.innerHTML = avatarHTML(selectedName);
+  av.innerHTML = avatarHTML(selectedName, selectedPhotoURL);
   document.getElementById('user-pill-name').textContent = selectedName;
   document.getElementById('user-pill-actions').style.display = 'flex';
   showAuthState('done');
@@ -1157,6 +1225,8 @@ auth.onAuthStateChanged(async (user) => {
     // First login — pre-fill from Google account name
     const suggested = (user.displayName || '').split(' ')[0];
     document.getElementById('setup-name-input').value = suggested;
+    pendingPhotoURL = null;
+    refreshSetupPhotoPreview(suggested);
     showAuthState('setup');
   } else {
     applyProfile(snap.val(), user); // pass user so PostHog can identify properly
@@ -1169,6 +1239,8 @@ async function handleSignOut() {
   selectedName = null;
   selectedTime = null;
   selectedDestination = '';
+  selectedPhotoURL = null;
+  pendingPhotoURL = null;
   document.getElementById('user-pill-actions').style.display = 'none';
   document.getElementById('destination-input').value = '';
   document.querySelectorAll('.time-btn.selected').forEach(b => b.classList.remove('selected'));
@@ -1183,6 +1255,8 @@ document.getElementById('setup-back-btn').addEventListener('click', () => {
 
 document.getElementById('edit-name-btn').addEventListener('click', () => {
   document.getElementById('setup-name-input').value = selectedName || '';
+  pendingPhotoURL = selectedPhotoURL; // carry over existing custom photo
+  refreshSetupPhotoPreview(selectedName);
   showAuthState('setup');
 });
 
@@ -1218,14 +1292,41 @@ document.getElementById('google-sign-in-btn').addEventListener('click', async ()
   }
 });
 
+// Photo upload button
+document.getElementById('setup-photo-upload-btn').addEventListener('click', () => {
+  document.getElementById('setup-photo-input').click();
+});
+
+document.getElementById('setup-photo-input').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const name = document.getElementById('setup-name-input').value.trim();
+  pendingPhotoURL = await compressImage(file);
+  refreshSetupPhotoPreview(name);
+  e.target.value = ''; // reset so same file can be re-picked
+});
+
+document.getElementById('setup-photo-remove-btn').addEventListener('click', () => {
+  pendingPhotoURL = null;
+  refreshSetupPhotoPreview(document.getElementById('setup-name-input').value.trim());
+});
+
+// Refresh preview when name changes (affects initials fallback)
+document.getElementById('setup-name-input').addEventListener('input', e => {
+  if (!pendingPhotoURL) refreshSetupPhotoPreview(e.target.value.trim());
+});
+
 document.getElementById('setup-confirm-btn').addEventListener('click', async () => {
   const name = document.getElementById('setup-name-input').value.trim();
   if (!name) return;
   const user = auth.currentUser;
+  const profileData = { displayName: name, setupAt: Date.now() };
+  if (pendingPhotoURL) profileData.photoURL = pendingPhotoURL;
   if (user) {
-    await db.ref(`lunch-plane/users/${user.uid}/profile`).set({ displayName: name, setupAt: Date.now() });
+    await db.ref(`lunch-plane/users/${user.uid}/profile`).set(profileData);
   }
-  applyProfile({ displayName: name }, user); // pass user so PostHog can identify
+  applyProfile(profileData, user);
+  pendingPhotoURL = null;
 });
 
 function genTimes() {
@@ -1256,8 +1357,44 @@ function getPhotoUrl(name) {
   return `photos/${name.toLowerCase()}.jpg`;
 }
 
-function avatarHTML(name) {
-  return `<img src="${getPhotoUrl(name)}" alt="${name}" onerror="this.remove();this.parentNode.textContent='${getInitials(name)}'">`;
+function avatarHTML(name, customURL) {
+  const src = customURL || getPhotoUrl(name);
+  return `<img src="${src}" alt="${name}" onerror="this.src='${getPhotoUrl(name)}';this.onerror=function(){this.remove();this.parentNode.textContent='${getInitials(name)}'}">`;
+}
+
+function compressImage(file) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 480;
+        let w = img.width, h = img.height;
+        if (w > h) { if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; } }
+        else        { if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; } }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function refreshSetupPhotoPreview(name) {
+  const preview = document.getElementById('setup-photo-preview');
+  const removeBtn = document.getElementById('setup-photo-remove-btn');
+  preview.style.background = getColor(name || 'default');
+  if (pendingPhotoURL) {
+    preview.innerHTML = `<img src="${pendingPhotoURL}">`;
+    removeBtn.style.display = '';
+  } else {
+    const teamSrc = getPhotoUrl(name || '');
+    preview.innerHTML = `<img src="${teamSrc}" onerror="this.remove();this.parentNode.textContent='${getInitials(name || '?')}'">`;
+    removeBtn.style.display = 'none';
+  }
 }
 
 function getColor(name) {
@@ -1271,6 +1408,8 @@ let selectedName = null;
 let selectedTime = null;
 let passengers = []; // kept in sync by the real-time listener below
 let selectedDestination = '';
+let selectedPhotoURL = null; // custom uploaded photo for current user
+let pendingPhotoURL = null;  // photo staged in the edit screen before saving
 
 // ── Build time grid ───────────────────────────────────────────────
 const timeGrid = document.getElementById('time-grid');
@@ -1337,12 +1476,14 @@ function handleBoard() {
       time: selectedTime,
       destination: selectedDestination,
     });
-    passengersRef().child(key).set({
+    const record = {
       name: selectedName,
       time: selectedTime,
       destination: selectedDestination,
       boardedAt: Date.now()
-    });
+    };
+    if (selectedPhotoURL) record.photoURL = selectedPhotoURL;
+    passengersRef().child(key).set(record);
   }
 }
 
@@ -1392,7 +1533,7 @@ function renderPassengers() {
       chip.className = 'passenger-chip';
       const isYou = p.name === selectedName;
       chip.innerHTML = `
-        <div class="passenger-avatar" style="background:${getColor(p.name)};color:#111">${avatarHTML(p.name)}</div>
+        <div class="passenger-avatar" style="background:${getColor(p.name)};color:#111">${avatarHTML(p.name, p.photoURL || null)}</div>
         <div class="passenger-chip-inner">
           <span class="passenger-name${isYou ? ' is-you' : ''}">${p.name}${isYou ? ' (you)' : ''}</span>
           ${p.destination ? `<span class="passenger-destination">${p.destination}</span>` : ''}
