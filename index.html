@@ -639,33 +639,33 @@
 
   #auth-overlay .setup-photo-wrap {
     display: flex;
-    align-items: center;
-    gap: 16px;
+    flex-direction: column;
+    gap: 10px;
     margin-bottom: 16px;
   }
   #auth-overlay .setup-photo-preview {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
+    width: 100%;
+    height: 160px;
+    border-radius: 10px;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
+    font-size: 36px;
     font-weight: 700;
-    flex-shrink: 0;
     color: #111;
   }
   #auth-overlay .setup-photo-preview img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center top;
+    object-position: center;
   }
   #auth-overlay .setup-photo-btns {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
   }
   #auth-overlay .setup-photo-upload-btn {
     background: rgba(255,255,255,0.1);
@@ -689,7 +689,6 @@
     font-family: 'MintGrotesk', sans-serif;
     cursor: pointer;
     padding: 0;
-    text-align: left;
     transition: color 0.15s;
   }
   #auth-overlay .setup-photo-remove-btn:hover {
@@ -971,7 +970,7 @@
       <div class="auth-brand-icon">✈</div>
       <div class="auth-brand-name">Lunch Plane</div>
     </div>
-    <h2>What should we call you?</h2>
+    <h2>Edit your profile</h2>
     <p>We pulled this from your Google account —<br>update it if you go by a nickname.</p>
     <div class="setup-photo-wrap">
       <div class="setup-photo-preview" id="setup-photo-preview"></div>
