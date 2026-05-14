@@ -1354,7 +1354,7 @@ function getInitials(name) {
 }
 
 function getPhotoUrl(name) {
-  return `photos/${name.toLowerCase()}.jpg`;
+  return `photos/${encodeURIComponent(name.toLowerCase())}.jpg`;
 }
 
 function avatarHTML(name, customURL) {
