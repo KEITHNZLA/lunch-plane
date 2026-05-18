@@ -1205,31 +1205,40 @@ function applyProfile(profile, firebaseUser) {
   }
 }
 
+// Safety net — if auth never resolves within 8s, show sign-in screen
+const authTimeout = setTimeout(() => showAuthState('signin'), 8000);
+
 // Fires on every auth state change — including page load and after popup sign-in
 auth.onAuthStateChanged(async (user) => {
-  if (!user) { showAuthState('signin'); return; }
+  clearTimeout(authTimeout);
+  try {
+    if (!user) { showAuthState('signin'); return; }
 
-  // Domain check
-  if (!user.email.endsWith(ALLOWED_DOMAIN)) {
-    await auth.signOut();
+    // Domain check
+    if (!user.email.endsWith(ALLOWED_DOMAIN)) {
+      await auth.signOut();
+      showAuthState('signin');
+      showAuthError('This app is for Planes staff only. Please sign in with your @planes.agency Google account.');
+      return;
+    }
+
+    // Check for stored display name preference
+    const profileRef = db.ref(`lunch-plane/users/${user.uid}/profile`);
+    const snap = await profileRef.once('value');
+
+    if (!snap.exists()) {
+      // First login — pre-fill from Google account name
+      const suggested = (user.displayName || '').split(' ')[0];
+      document.getElementById('setup-name-input').value = suggested;
+      pendingPhotoURL = null;
+      refreshSetupPhotoPreview(suggested);
+      showAuthState('setup');
+    } else {
+      applyProfile(snap.val(), user); // pass user so PostHog can identify properly
+    }
+  } catch (err) {
+    console.error('Auth error:', err);
     showAuthState('signin');
-    showAuthError('This app is for Planes staff only. Please sign in with your @planes.agency Google account.');
-    return;
-  }
-
-  // Check for stored display name preference
-  const profileRef = db.ref(`lunch-plane/users/${user.uid}/profile`);
-  const snap = await profileRef.once('value');
-
-  if (!snap.exists()) {
-    // First login — pre-fill from Google account name
-    const suggested = (user.displayName || '').split(' ')[0];
-    document.getElementById('setup-name-input').value = suggested;
-    pendingPhotoURL = null;
-    refreshSetupPhotoPreview(suggested);
-    showAuthState('setup');
-  } else {
-    applyProfile(snap.val(), user); // pass user so PostHog can identify properly
   }
 });
 
