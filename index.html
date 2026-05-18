@@ -1296,9 +1296,7 @@ document.getElementById('google-sign-in-btn').addEventListener('click', async ()
     await auth.signInWithPopup(googleProvider);
     // onAuthStateChanged handles the rest
   } catch (e) {
-    if (e.code !== 'auth/popup-closed-by-user') {
-      showAuthError('Sign-in failed. Please try again.');
-    }
+    showAuthError(`Sign-in error: ${e.code || e.message || e}`);
   }
 });
 
