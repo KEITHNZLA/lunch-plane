@@ -1239,6 +1239,7 @@ auth.onAuthStateChanged(async (user) => {
   } catch (err) {
     console.error('Auth error:', err);
     showAuthState('signin');
+    showAuthError(`Error: ${err.message || err.code || err}`);
   }
 });
 
