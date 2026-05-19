@@ -1073,6 +1073,7 @@
         <option>Strongroom</option>
         <option>The Royal Oak</option>
         <option>The Hoxton Hound</option>
+        <option>Haggerston park 🌳</option>
       </select>
     </div>
 
@@ -1105,10 +1106,6 @@
 
       <div class="flight-info-grid">
         <div class="flight-info-item">
-          <div class="fi-label">Status</div>
-          <div class="fi-value highlight" id="flight-status">Open tab</div>
-        </div>
-        <div class="flight-info-item">
           <div class="fi-label">Heading out at</div>
           <div class="fi-value" id="next-departure">—</div>
         </div>
@@ -1116,9 +1113,9 @@
           <div class="fi-label">On the tab</div>
           <div class="fi-value" id="pax-count">0</div>
         </div>
-        <div class="flight-info-item">
-          <div class="fi-label">Venue</div>
-          <div class="fi-value">TBC</div>
+        <div class="flight-info-item" style="grid-column: span 2">
+          <div class="fi-label">Top vote</div>
+          <div class="fi-value" id="top-venue">—</div>
         </div>
       </div>
 
@@ -1541,8 +1538,23 @@ function renderPassengers() {
 
   paxCount.textContent = passengers.length;
 
+  // Venue vote tally
+  const topVenueEl = document.getElementById('top-venue');
+  if (topVenueEl) {
+    const votes = {};
+    passengers.forEach(p => { if (p.destination) votes[p.destination] = (votes[p.destination] || 0) + 1; });
+    const sorted = Object.entries(votes).sort((a,b) => b[1] - a[1]);
+    if (sorted.length === 0) {
+      topVenueEl.textContent = '—';
+    } else if (sorted.length > 1 && sorted[0][1] === sorted[1][1]) {
+      topVenueEl.textContent = `${sorted[0][0]} · ${sorted[0][1]} 🤝`;
+    } else {
+      topVenueEl.textContent = `${sorted[0][0]} · ${sorted[0][1]}`;
+    }
+  }
+
   if (passengers.length === 0) {
-    list.innerHTML = `<div class="empty-state"><span class="empty-plane">✈</span>No passengers yet.<br>Be the first to board.</div>`;
+    list.innerHTML = `<div class="empty-state"><span class="empty-plane">🍺</span>No one in yet.<br>Be the first to the bar.</div>`;
     nextDep.textContent = '—';
     summaryStrip.style.display = 'none';
     return;
