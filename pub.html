@@ -30,13 +30,13 @@
   }
 
   :root {
-    --bg: #F5EBD5;
-    --bg-card: #FFF8EE;
-    --text: #111111;
-    --text-muted: #777777;
-    --accent: #1B1B1B;
-    --accent-green: #F5A623;
-    --border: #E0DDD5;
+    --bg: #1A0D04;
+    --bg-card: #2D1A0A;
+    --text: #F0E0C0;
+    --text-muted: #9A7A5A;
+    --accent: #F5A623;
+    --accent-green: #1A0D04;
+    --border: #4A2E12;
     --radius: 16px;
     --radius-sm: 10px;
   }
@@ -79,6 +79,15 @@
     justify-content: center;
     font-size: 18px;
     color: var(--accent-green);
+    text-decoration: none;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+  }
+  .logo-plane.switcher-inactive {
+    opacity: 0.3;
+  }
+  .logo-plane.switcher-inactive:hover {
+    opacity: 0.6;
   }
 
   .header-meta {
@@ -235,6 +244,20 @@
     color: var(--text-muted);
   }
 
+  .destination-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239A7A5A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+    cursor: pointer;
+    color: var(--text);
+  }
+  .destination-select option {
+    background: var(--bg-card);
+    color: var(--text);
+  }
   .destination-input:focus {
     border-color: var(--accent);
   }
@@ -993,13 +1016,14 @@
 
 <header>
   <div class="logo">
-    <div class="logo-plane">🍺</div>
+    <a href="index.html" class="logo-plane switcher-inactive" title="Lunch Plane">🍽</a>
+    <a href="pub.html" class="logo-plane switcher-active" title="Pub Plane">🍺</a>
     Pub Plane
   </div>
   <div class="header-meta">
     <span class="dot"></span>
     <span id="today-date"></span>
-    <a href="index.html" style="margin-left:12px;font-size:12px;color:var(--text-muted);text-decoration:none;opacity:0.6;">✈ Lunch Plane</a>
+
   </div>
 </header>
 
@@ -1039,7 +1063,17 @@
 
     <div class="field-group">
       <div class="field-label">Which pub?</div>
-      <input class="destination-input" id="destination-input" type="text" placeholder="e.g. The Surprise, The Crown…" maxlength="60" />
+      <select class="destination-input destination-select" id="destination-input">
+        <option value="">— Pick a pub —</option>
+        <option>The Great Beyond</option>
+        <option>Howl at the Moon</option>
+        <option>Shoreditch Arms</option>
+        <option>The Nelson</option>
+        <option>The Red Lion</option>
+        <option>Strongroom</option>
+        <option>The Royal Oak</option>
+        <option>The Hoxton Hound</option>
+      </select>
     </div>
 
     <button class="board-btn" id="board-btn" disabled onclick="handleBoard()">
@@ -1432,7 +1466,7 @@ TIMES.forEach(t => {
 });
 
 // ── Selection handlers ────────────────────────────────────────────
-document.getElementById('destination-input').addEventListener('input', e => {
+document.getElementById('destination-input').addEventListener('change', e => {
   selectedDestination = e.target.value.trim();
 });
 
