@@ -34,7 +34,7 @@
     --bg-card: #2D1A0A;
     --text: #F0E0C0;
     --text-muted: #9A7A5A;
-    --accent: #F5A623;
+    --accent: #7BAF7B;
     --accent-green: #1A0D04;
     --border: #4A2E12;
     --radius: 16px;
@@ -1095,12 +1095,12 @@
           <div class="flight-arrow">→</div>
           <div>
             <div class="flight-city">Destination</div>
-            <div class="flight-code">PUB</div>
+            <div class="flight-code" id="top-pub-name" style="font-size:16px;letter-spacing:-0.5px">—</div>
           </div>
         </div>
         <div style="text-align:right">
-          <div class="flight-city">Flight</div>
-          <div class="flight-code" style="font-size:18px">PP-001</div>
+          <div class="flight-city">Votes</div>
+          <div class="flight-code" style="font-size:28px" id="top-pub-votes">—</div>
         </div>
       </div>
 
@@ -1112,10 +1112,6 @@
         <div class="flight-info-item">
           <div class="fi-label">On the tab</div>
           <div class="fi-value" id="pax-count">0</div>
-        </div>
-        <div class="flight-info-item" style="grid-column: span 2">
-          <div class="fi-label">Top vote</div>
-          <div class="fi-value" id="top-venue">—</div>
         </div>
       </div>
 
@@ -1538,18 +1534,19 @@ function renderPassengers() {
 
   paxCount.textContent = passengers.length;
 
-  // Venue vote tally
-  const topVenueEl = document.getElementById('top-venue');
-  if (topVenueEl) {
+  // Vote tally — update top pub in flight board header
+  const topPubName  = document.getElementById('top-pub-name');
+  const topPubVotes = document.getElementById('top-pub-votes');
+  if (topPubName && topPubVotes) {
     const votes = {};
     passengers.forEach(p => { if (p.destination) votes[p.destination] = (votes[p.destination] || 0) + 1; });
     const sorted = Object.entries(votes).sort((a,b) => b[1] - a[1]);
     if (sorted.length === 0) {
-      topVenueEl.textContent = '—';
-    } else if (sorted.length > 1 && sorted[0][1] === sorted[1][1]) {
-      topVenueEl.textContent = `${sorted[0][0]} · ${sorted[0][1]} 🤝`;
+      topPubName.textContent  = '—';
+      topPubVotes.textContent = '—';
     } else {
-      topVenueEl.textContent = `${sorted[0][0]} · ${sorted[0][1]}`;
+      topPubName.textContent  = sorted[0][0];
+      topPubVotes.textContent = sorted[0][1];
     }
   }
 
@@ -1557,6 +1554,10 @@ function renderPassengers() {
     list.innerHTML = `<div class="empty-state"><span class="empty-plane">🍺</span>No one in yet.<br>Be the first to the bar.</div>`;
     nextDep.textContent = '—';
     summaryStrip.style.display = 'none';
+    const _n = document.getElementById('top-pub-name');
+    const _v = document.getElementById('top-pub-votes');
+    if (_n) _n.textContent = '—';
+    if (_v) _v.textContent = '—';
     return;
   }
 
