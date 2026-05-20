@@ -1546,15 +1546,42 @@ function renderPassengers() {
     const chips = document.createElement('div');
     chips.className = 'passenger-chips-grid';
 
-    grp.forEach(p => {
+    // Special case: Tim & Seamus get a combined card
+    let renderGrp = [...grp];
+    const timIdx    = renderGrp.findIndex(p => p.name === 'Tim');
+    const seamusIdx = renderGrp.findIndex(p => p.name === 'Seamus');
+    if (timIdx !== -1 && seamusIdx !== -1) {
+      const tim    = renderGrp[timIdx];
+      const seamus = renderGrp[seamusIdx];
+      const combinedDestinations = [tim.destination, seamus.destination].filter(Boolean);
+      const combined = {
+        name: 'Tim & Seamus',
+        time: tim.time,
+        _destinations: combinedDestinations,
+        boardedAt: Math.min(tim.boardedAt || 0, seamus.boardedAt || 0),
+        _isTimSeamus: true,
+      };
+      renderGrp = renderGrp.filter((_, i) => i !== timIdx && i !== seamusIdx);
+      renderGrp.unshift(combined);
+    }
+
+    renderGrp.forEach(p => {
       const chip = document.createElement('div');
       chip.className = 'passenger-chip';
       const isYou = p.name === selectedName;
+
+      let destinationHTML = '';
+      if (p._isTimSeamus) {
+        destinationHTML = (p._destinations || []).map(d => `<span class="passenger-destination">${d}</span>`).join('');
+      } else if (p.destination) {
+        destinationHTML = `<span class="passenger-destination">${p.destination}</span>`;
+      }
+
       chip.innerHTML = `
         <div class="passenger-avatar" style="background:${getColor(p.name)};color:#111">${avatarHTML(p.name, p.photoURL || null)}</div>
         <div class="passenger-chip-inner">
           <span class="passenger-name${isYou ? ' is-you' : ''}">${p.name}${isYou ? ' (you)' : ''}</span>
-          ${p.destination ? `<span class="passenger-destination">${p.destination}</span>` : ''}
+          ${destinationHTML}
         </div>
       `;
       chips.appendChild(chip);
