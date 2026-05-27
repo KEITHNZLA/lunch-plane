@@ -1470,7 +1470,9 @@ function handleBoard() {
       boardedAt: Date.now()
     };
     if (selectedPhotoURL) record.photoURL = selectedPhotoURL;
-    passengersRef().child(key).set(record);
+    passengersRef().child(key).set(record).catch(err => {
+      alert('Could not board: ' + (err.message || err.code || err) + '\n\nYou may need to update Firebase database rules to allow run-plane/ path.');
+    });
   }
 }
 
