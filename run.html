@@ -1242,7 +1242,7 @@ async function handleSignOut() {
   selectedPhotoURL = null;
   pendingPhotoURL = null;
   document.getElementById('user-pill-actions').style.display = 'none';
-  // no destination input on run plane
+  selectedDestination = '';
   document.querySelectorAll('.time-btn.selected').forEach(b => b.classList.remove('selected'));
   updateBoardBtn();
   showAuthState('signin');
@@ -1412,9 +1412,7 @@ TIMES.forEach(t => {
 });
 
 // ── Selection handlers ────────────────────────────────────────────
-document.getElementById('destination-input').addEventListener('input', e => {
-  selectedDestination = e.target.value.trim();
-});
+// No destination input on Run Plane
 
 function selectTime(t) {
   selectedTime = t;
