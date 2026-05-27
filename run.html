@@ -1068,8 +1068,8 @@
           <div class="fi-value" id="next-departure">—</div>
         </div>
         <div class="flight-info-item">
-          <div class="fi-label">Runners</div>
-          <div class="fi-value" id="pax-count">0</div>
+          <div class="fi-label">Date</div>
+          <div class="fi-value" id="run-date">—</div>
         </div>
         <div class="flight-info-item">
           <div class="fi-label">Meet at</div>
@@ -1479,13 +1479,13 @@ function handleBoard() {
 // ── Render ────────────────────────────────────────────────────────
 function renderPassengers() {
   const list         = document.getElementById('passenger-list');
-  const paxCount     = document.getElementById('pax-count');
+  const paxCount     = null; // removed — date shown instead
   const nextDep      = document.getElementById('next-departure');
   const summaryStrip = document.getElementById('summary-strip');
   const summaryCount = document.getElementById('summary-count');
   const summaryNext  = document.getElementById('summary-next');
 
-  paxCount.textContent = passengers.length;
+  if (paxCount) paxCount.textContent = passengers.length;
 
   if (passengers.length === 0) {
     list.innerHTML = `<div class="empty-state"><span class="empty-plane">🏃</span>No runners yet.<br>Be the first outside.</div>`;
