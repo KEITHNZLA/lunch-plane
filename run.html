@@ -1590,10 +1590,21 @@ connectedRef.on('value', snap => {
 // ── Date display ──────────────────────────────────────────────────
 function setDate() {
   const d = new Date();
-  const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const days   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const fullDays = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   document.getElementById('today-date').textContent =
-    `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
+    `${fullDays[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+
+  // Next run club Thursday — every 2 weeks, anchored on 28 May 2026
+  const anchor = new Date(2026, 4, 28); // May 28 2026
+  const today  = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const msDay  = 24 * 60 * 60 * 1000;
+  const diff   = Math.round((today - anchor) / msDay);
+  const n      = Math.max(0, Math.ceil(diff / 14));
+  const runDay = new Date(anchor.getTime() + n * 14 * msDay);
+  const runEl  = document.getElementById('run-date');
+  if (runEl) runEl.textContent = `${days[runDay.getDay()]} ${runDay.getDate()} ${months[runDay.getMonth()]}`;
 }
 
 setDate();
