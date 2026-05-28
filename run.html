@@ -1127,14 +1127,22 @@ const FIREBASE_CONFIG = {
 firebase.initializeApp(FIREBASE_CONFIG);
 const db = firebase.database();
 
-// ── Date-scoped ref — data lives at lunch-plane/YYYY-MM-DD/passengers
-// so the board automatically resets each morning.
-function todayKey() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+// ── Run-scoped ref — data lives at run-plane/YYYY-MM-DD/passengers
+// where the date is the upcoming (or current) run club Thursday.
+// Run club is every 2 weeks, anchored on 28 May 2026.
+// Passengers board any time between runs and data persists until 23:59 of run day.
+function runKey() {
+  const msDay  = 24 * 60 * 60 * 1000;
+  const anchor = new Date(2026, 4, 28); // May 28 2026 (month is 0-indexed)
+  const now    = new Date();
+  const today  = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diff   = Math.round((today - anchor) / msDay);
+  const n      = Math.max(0, Math.ceil(diff / 14));
+  const runDay = new Date(anchor.getTime() + n * 14 * msDay);
+  return `${runDay.getFullYear()}-${String(runDay.getMonth()+1).padStart(2,'0')}-${String(runDay.getDate()).padStart(2,'0')}`;
 }
 function passengersRef() {
-  return db.ref(`run-plane/${todayKey()}/passengers`);
+  return db.ref(`run-plane/${runKey()}/passengers`);
 }
 
 // Firebase keys can't contain . # $ [ ] /  — sanitise name to a safe key
