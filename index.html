@@ -137,7 +137,7 @@
   /* ── Left panel: Booking ── */
   .booking-panel {
     flex: 1;
-    padding: 80px 160px 80px;
+    padding: 80px 80px 80px 160px;
   }
 
   /* ── Left panel: Booking (content styles) ── */
@@ -1135,7 +1135,7 @@
       <div class="time-grid" id="time-grid"></div>
     </div>
 
-    <div class="field-group">
+    <div class="field-group" id="destination-field">
       <div class="field-label">Where are you going?</div>
       <input class="destination-input" id="destination-input" type="text" placeholder="e.g. The Corner Deli, Troy…" maxlength="60" />
     </div>
@@ -1772,6 +1772,7 @@ function buildDayGrid() {
       <span class="day-btn-num">${d.getDate()}</span>
       ${isTeamLunch ? '<span class="day-star">🤩</span>' : ''}`;
     if (isTeamLunch) btn.classList.add('team-lunch-day');
+    if (dStr < todayStr) btn.style.opacity = '0.5';
     btn.dataset.dateKey = dStr;
     btn.onclick = () => selectDay(d, btn);
     if (dStr === todayStr) {
@@ -1805,15 +1806,18 @@ function updatePageForDay() {
   const subtitle  = document.getElementById('main-subtitle');
   const timeField = document.getElementById('time-field');
 
+  const destField = document.getElementById('destination-field');
   if (isTeamLunch) {
     heading.innerHTML = 'Team lunch day! 🥳';
     subtitle.textContent = "Company is ordering food to the office — it's on us. Let us know you're joining!";
     if (timeField) timeField.style.display = 'none';
+    if (destField) destField.style.display = 'none';
     selectedTime = '12:30'; // fixed for team lunch
   } else {
     heading.innerHTML = getDynamicHeading(selectedName);
     subtitle.textContent = "Let the team know you're heading out for lunch — choose a departure time and we'll hold your seat.";
     if (timeField) timeField.style.display = '';
+    if (destField) destField.style.display = '';
     // clear selectedTime if it was forced to 12:30
     if (selectedTime === '12:30' && !document.querySelector('.time-btn.selected')) {
       selectedTime = null;
