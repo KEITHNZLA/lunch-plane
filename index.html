@@ -185,6 +185,7 @@
     transition: all 0.15s;
     text-align: center;
     position: relative;
+    overflow: visible;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -195,6 +196,17 @@
     background: var(--accent);
     border-color: var(--accent);
     color: #fff;
+  }
+  .day-btn.team-lunch-day {
+    border: 2px solid transparent;
+    background:
+      linear-gradient(var(--bg-card), var(--bg-card)) padding-box,
+      linear-gradient(135deg, #ff0000, #ff8800, #ffee00, #00cc44, #0088ff, #8833ff, #ff0000) border-box;
+  }
+  .day-btn.team-lunch-day.selected {
+    background:
+      linear-gradient(var(--accent), var(--accent)) padding-box,
+      linear-gradient(135deg, #ff0000, #ff8800, #ffee00, #00cc44, #0088ff, #8833ff, #ff0000) border-box;
   }
   .day-btn-name {
     font-size: 10px;
@@ -212,8 +224,12 @@
   }
   .day-btn.selected .day-btn-num { color: #fff; }
   .day-star {
-    font-size: 10px;
+    position: absolute;
+    top: -12px;
+    right: -10px;
+    font-size: 22px;
     line-height: 1;
+    pointer-events: none;
   }
 
   /* Name grid */
