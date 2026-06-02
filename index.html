@@ -56,8 +56,13 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 28px 40px;
+    padding: 28px 48px;
     border-bottom: 1px solid var(--border);
+    grid-column: 1 / -1;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
   }
 
   .logo {
@@ -120,19 +125,19 @@
     background: var(--bg);
   }
   .right-col {
+    height: calc(100vh - 85px);
     position: sticky;
-    top: 0;
-    height: 100vh;
+    top: 85px;
     overflow-y: auto;
     background: var(--accent);
-    padding: 40px 36px;
+    padding: 40px 40px;
     box-sizing: border-box;
   }
 
   /* ── Left panel: Booking ── */
   .booking-panel {
     flex: 1;
-    padding: 40px 40px 48px;
+    padding: 56px 64px 64px;
   }
 
   /* ── Left panel: Booking (content styles) ── */
@@ -626,12 +631,14 @@
     .right-col {
       position: static;
       height: auto;
+      top: 0;
     }
     .booking-panel {
       padding: 24px 20px;
     }
     header {
-      padding: 20px;
+      padding: 20px 24px;
+      grid-column: 1;
     }
     .booking-panel h1 {
       font-size: 36px;
@@ -1061,7 +1068,6 @@
 
 </div>
 
-<div class="left-col">
 <header>
   <div class="logo">
     <a href="index.html" class="logo-plane switcher-active" title="Lunch Plane">🍽</a>
@@ -1074,6 +1080,7 @@
     <span id="today-date"></span>
   </div>
 </header>
+<div class="left-col">
   <!-- LEFT: Booking -->
   <div class="booking-panel">
     <h1 id="main-heading">Board the<br>Lunch Plane.</h1>
@@ -1748,7 +1755,7 @@ function buildDayGrid() {
     btn.innerHTML = `
       <span class="day-btn-name">${DAY_NAMES[i]}</span>
       <span class="day-btn-num">${d.getDate()}</span>
-      ${isTeamLunch ? '<span class="day-star">⭐</span>' : ''}`;
+      ${isTeamLunch ? '<span class="day-star">🤩</span>' : ''}`;
     if (isTeamLunch) btn.classList.add('team-lunch-day');
     btn.dataset.dateKey = dStr;
     btn.onclick = () => selectDay(d, btn);
