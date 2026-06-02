@@ -1807,6 +1807,7 @@ function updatePageForDay() {
   const timeField = document.getElementById('time-field');
 
   const destField = document.getElementById('destination-field');
+  const isThursday = selectedDay && selectedDay.getDay() === 4;
   if (isTeamLunch) {
     heading.innerHTML = 'Team lunch day! 🥳';
     subtitle.textContent = "Company is ordering food to the office — it's on us. Let us know you're joining!";
@@ -1817,7 +1818,7 @@ function updatePageForDay() {
     heading.innerHTML = getDynamicHeading(selectedName);
     subtitle.textContent = "Let the team know you're heading out for lunch — choose a departure time and we'll hold your seat.";
     if (timeField) timeField.style.display = '';
-    if (destField) destField.style.display = '';
+    if (destField) destField.style.display = isThursday ? 'none' : '';
     // clear selectedTime if it was forced to 12:30
     if (selectedTime === '12:30' && !document.querySelector('.time-btn.selected')) {
       selectedTime = null;
