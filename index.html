@@ -47,8 +47,8 @@
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 
   /* ── Header ── */
@@ -112,20 +112,30 @@
     50% { opacity: 0.4; }
   }
 
-  /* ── Main layout ── */
-  main {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-    padding: 48px 40px;
-    gap: 48px;
+  /* ── Two-column full-height layout ── */
+  .left-col {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    background: var(--bg);
+  }
+  .right-col {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--accent);
+    padding: 40px 36px;
+    box-sizing: border-box;
   }
 
   /* ── Left panel: Booking ── */
+  .booking-panel {
+    flex: 1;
+    padding: 40px 40px 48px;
+  }
+
+  /* ── Left panel: Booking (content styles) ── */
   .booking-panel h1 {
     font-weight: 700;
     font-size: 48px;
@@ -152,6 +162,53 @@
 
   .field-group {
     margin-bottom: 32px;
+  }
+
+  /* Day selector */
+  .day-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+  }
+  .day-btn {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 6px 8px;
+    font-family: 'MintGrotesk', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .day-btn:hover { border-color: var(--accent); }
+  .day-btn.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .day-btn-name {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .day-btn.selected .day-btn-name { color: rgba(255,255,255,0.7); }
+  .day-btn-num {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .day-btn.selected .day-btn-num { color: #fff; }
+  .day-star {
+    font-size: 10px;
+    line-height: 1;
   }
 
   /* Name grid */
@@ -310,9 +367,8 @@
   }
 
   .flight-board {
-    background: var(--accent);
     border-radius: var(--radius);
-    padding: 28px;
+    padding: 0;
     color: #fff;
     flex: 1;
   }
@@ -564,10 +620,15 @@
 
   /* Responsive */
   @media (max-width: 768px) {
-    main {
+    body {
       grid-template-columns: 1fr;
+    }
+    .right-col {
+      position: static;
+      height: auto;
+    }
+    .booking-panel {
       padding: 24px 20px;
-      gap: 32px;
     }
     header {
       padding: 20px;
@@ -1000,6 +1061,7 @@
 
 </div>
 
+<div class="left-col">
 <header>
   <div class="logo">
     <a href="index.html" class="logo-plane switcher-active" title="Lunch Plane">🍽</a>
@@ -1012,12 +1074,15 @@
     <span id="today-date"></span>
   </div>
 </header>
-
-<main>
   <!-- LEFT: Booking -->
   <div class="booking-panel">
-    <h1>Board the<br>Lunch Plane.</h1>
-    <p class="subtitle">Let the team know you're heading out for lunch — choose a departure time and we'll hold your seat.</p>
+    <h1 id="main-heading">Board the<br>Lunch Plane.</h1>
+    <p class="subtitle" id="main-subtitle">Let the team know you're heading out for lunch — choose a departure time and we'll hold your seat.</p>
+
+    <div class="field-group">
+      <div class="field-label">Day</div>
+      <div class="day-grid" id="day-grid"></div>
+    </div>
 
     <div class="field-group">
       <div class="field-label">Flying as</div>
@@ -1042,7 +1107,7 @@
       </div>
     </div>
 
-    <div class="field-group">
+    <div class="field-group" id="time-field">
       <div class="field-label">Departure Time</div>
       <div class="time-grid" id="time-grid"></div>
     </div>
@@ -1058,6 +1123,9 @@
     </button>
   </div>
 
+</div><!-- end .left-col -->
+
+<div class="right-col">
   <!-- RIGHT: Flight Board -->
   <div class="flight-panel">
     <div class="flight-board">
@@ -1119,8 +1187,8 @@
         <div class="ss-label">on board</div>
       </div>
     </div>
-  </div>
-</main>
+  </div><!-- end .flight-panel -->
+</div><!-- end .right-col -->
 
 <!-- Firebase Realtime Database SDK (compat v9 — no build step required) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -1148,6 +1216,48 @@ const FIREBASE_CONFIG = {
 firebase.initializeApp(FIREBASE_CONFIG);
 const db = firebase.database();
 
+// ── Team Lunch Thursdays — every 2nd Thursday from June 4, 2026 ──
+const TEAM_LUNCH_ANCHOR = new Date(2026, 5, 4); // June 4 2026 (month is 0-indexed)
+
+function isTeamLunchThursday(date) {
+  if (date.getDay() !== 4) return false; // must be Thursday
+  const anchor = new Date(TEAM_LUNCH_ANCHOR.getFullYear(), TEAM_LUNCH_ANCHOR.getMonth(), TEAM_LUNCH_ANCHOR.getDate());
+  const d      = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const diffDays = Math.round((d - anchor) / (24*60*60*1000));
+  return diffDays >= 0 && diffDays % 14 === 0;
+}
+
+function dateKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function getWeekDays() {
+  const today = new Date();
+  const dow = today.getDay(); // 0=Sun
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
+  monday.setHours(0,0,0,0);
+  return Array.from({length: 5}, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d;
+  });
+}
+
+const HEADINGS = [
+  n => `Hi ${n}, hungry? 🤔`,
+  n => `Where are we off to, ${n}?`,
+  n => `Ready to escape the desk, ${n}? ✈`,
+  n => `Time to refuel, ${n}! ✈`,
+  n => `${n}, it's lunch o'clock!`,
+];
+
+function getDynamicHeading(name) {
+  if (!name) return 'Board the<br>Lunch Plane.';
+  const idx = Math.floor(Math.random() * HEADINGS.length);
+  return HEADINGS[idx](name);
+}
+
 // ── Date-scoped ref — data lives at lunch-plane/YYYY-MM-DD/passengers
 // so the board automatically resets each morning.
 function todayKey() {
@@ -1155,7 +1265,8 @@ function todayKey() {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 function passengersRef() {
-  return db.ref(`lunch-plane/${todayKey()}/passengers`);
+  const key = selectedDay ? dateKey(selectedDay) : todayKey();
+  return db.ref(`lunch-plane/${key}/passengers`);
 }
 
 // Firebase keys can't contain . # $ [ ] /  — sanitise name to a safe key
@@ -1199,6 +1310,10 @@ function applyProfile(profile, firebaseUser) {
   document.getElementById('user-pill-name').textContent = selectedName;
   document.getElementById('user-pill-actions').style.display = 'flex';
   showAuthState('done');
+  const headingEl = document.getElementById('main-heading');
+  if (headingEl && !isTeamLunchThursday(selectedDay || new Date())) {
+    headingEl.innerHTML = getDynamicHeading(selectedName);
+  }
   updateBoardBtn();
 
   // PostHog: identify so events are linked to a real person
@@ -1426,6 +1541,7 @@ function getColor(name) {
 // ── App state ─────────────────────────────────────────────────────
 let selectedName = null;
 let selectedTime = null;
+let selectedDay = null; // Date object for the selected day
 let passengers = []; // kept in sync by the real-time listener below
 let selectedDestination = '';
 let selectedPhotoURL = null; // custom uploaded photo for current user
@@ -1460,19 +1576,36 @@ function updateBoardBtn() {
   const icon = document.getElementById('board-btn-icon');
   const text = document.getElementById('board-btn-text');
   const already = passengers.find(p => p.name === selectedName);
+  const isTeamLunch = selectedDay && isTeamLunchThursday(selectedDay);
 
-  if (!selectedName || !selectedTime) {
-    btn.disabled = true; btn.className = 'board-btn';
-    icon.textContent = '✈';
-    text.textContent = selectedName ? 'Choose a departure time to board' : 'Sign in to board';
-  } else if (already) {
-    btn.disabled = false; btn.className = 'board-btn boarded';
-    icon.textContent = '×';
-    text.textContent = `Deboard (${selectedName} · ${already.time})`;
+  if (isTeamLunch) {
+    if (!selectedName) {
+      btn.disabled = true; btn.className = 'board-btn';
+      icon.textContent = '🥳';
+      text.textContent = 'Sign in to join';
+    } else if (already) {
+      btn.disabled = false; btn.className = 'board-btn boarded';
+      icon.textContent = '×';
+      text.textContent = "You're in! (tap to leave)";
+    } else {
+      btn.disabled = false; btn.className = 'board-btn';
+      icon.textContent = '🥳';
+      text.textContent = "I'm in!";
+    }
   } else {
-    btn.disabled = false; btn.className = 'board-btn';
-    icon.textContent = '↗';
-    text.textContent = `Board at ${selectedTime} as ${selectedName}`;
+    if (!selectedName || !selectedTime) {
+      btn.disabled = true; btn.className = 'board-btn';
+      icon.textContent = '✈';
+      text.textContent = selectedName ? 'Choose a departure time to board' : 'Sign in to board';
+    } else if (already) {
+      btn.disabled = false; btn.className = 'board-btn boarded';
+      icon.textContent = '×';
+      text.textContent = `Deboard (${selectedName} · ${already.time})`;
+    } else {
+      btn.disabled = false; btn.className = 'board-btn';
+      icon.textContent = '↗';
+      text.textContent = `Board at ${selectedTime} as ${selectedName}`;
+    }
   }
 }
 
@@ -1599,15 +1732,91 @@ function renderPassengers() {
   summaryNext.textContent = `${sortedTimes[0]} · ${nextNames}`;
 }
 
-// ── Real-time listener ────────────────────────────────────────────
-// Fires immediately on load (with current data) and again on every change.
-// All connected browsers update in real-time — no polling needed.
-passengersRef().on('value', snapshot => {
-  const data = snapshot.val() || {};
-  passengers = Object.values(data);
-  renderPassengers();
+// ── Day selector ──────────────────────────────────────────────────
+function buildDayGrid() {
+  const grid = document.getElementById('day-grid');
+  const weekDays = getWeekDays();
+  const todayStr = todayKey();
+  const DAY_NAMES = ['Mon','Tue','Wed','Thu','Fri'];
+  grid.innerHTML = '';
+  let autoSelected = false;
+  weekDays.forEach((d, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'day-btn';
+    const dStr = dateKey(d);
+    const isTeamLunch = isTeamLunchThursday(d);
+    btn.innerHTML = `
+      <span class="day-btn-name">${DAY_NAMES[i]}</span>
+      <span class="day-btn-num">${d.getDate()}</span>
+      ${isTeamLunch ? '<span class="day-star">⭐</span>' : ''}`;
+    if (isTeamLunch) btn.classList.add('team-lunch-day');
+    btn.dataset.dateKey = dStr;
+    btn.onclick = () => selectDay(d, btn);
+    if (dStr === todayStr) {
+      btn.classList.add('selected');
+      selectedDay = d;
+      autoSelected = true;
+    }
+    grid.appendChild(btn);
+  });
+  if (!autoSelected) {
+    // Weekend: auto-select Monday
+    grid.firstChild.classList.add('selected');
+    selectedDay = weekDays[0];
+  }
+  subscribePassengers();
+  updatePageForDay();
+}
+
+function selectDay(d, btn) {
+  selectedDay = d;
+  document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  passengers = [];
+  subscribePassengers();
+  updatePageForDay();
+}
+
+function updatePageForDay() {
+  const isTeamLunch = isTeamLunchThursday(selectedDay);
+  const heading   = document.getElementById('main-heading');
+  const subtitle  = document.getElementById('main-subtitle');
+  const timeField = document.getElementById('time-field');
+
+  if (isTeamLunch) {
+    heading.innerHTML = 'Team lunch day! 🥳';
+    subtitle.textContent = "Company is ordering food to the office — it's on us. Let us know you're joining!";
+    if (timeField) timeField.style.display = 'none';
+    selectedTime = '12:30'; // fixed for team lunch
+  } else {
+    heading.innerHTML = getDynamicHeading(selectedName);
+    subtitle.textContent = "Let the team know you're heading out for lunch — choose a departure time and we'll hold your seat.";
+    if (timeField) timeField.style.display = '';
+    // clear selectedTime if it was forced to 12:30
+    if (selectedTime === '12:30' && !document.querySelector('.time-btn.selected')) {
+      selectedTime = null;
+    }
+  }
   updateBoardBtn();
-});
+}
+
+// ── Real-time listener ────────────────────────────────────────────
+let _passengersListenerFn = null;
+let _passengersListenerRef = null;
+
+function subscribePassengers() {
+  if (_passengersListenerRef && _passengersListenerFn) {
+    _passengersListenerRef.off('value', _passengersListenerFn);
+  }
+  _passengersListenerRef = passengersRef();
+  _passengersListenerFn = snapshot => {
+    const data = snapshot.val() || {};
+    passengers = Object.values(data);
+    renderPassengers();
+    updateBoardBtn();
+  };
+  _passengersListenerRef.on('value', _passengersListenerFn);
+}
 
 // ── Connection status indicator ───────────────────────────────────
 const connectedRef = db.ref('.info/connected');
@@ -1628,6 +1837,7 @@ function setDate() {
 }
 
 setDate();
+buildDayGrid();
 </script>
 </body>
 </html>
