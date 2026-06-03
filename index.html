@@ -1140,6 +1140,11 @@
       <input class="destination-input" id="destination-input" type="text" placeholder="e.g. The Corner Deli, Troy…" maxlength="60" />
     </div>
 
+    <div class="field-group" id="dietary-field" style="display:none">
+      <div class="field-label">Dietary Requirements</div>
+      <input class="destination-input" id="dietary-input" type="text" placeholder="e.g. vegetarian, gluten-free, none…" maxlength="100" />
+    </div>
+
     <button class="board-btn" id="board-btn" disabled onclick="handleBoard()">
       <span id="board-btn-icon">✈</span>
       <span id="board-btn-text">Select passenger &amp; time to board</span>
@@ -1398,6 +1403,7 @@ async function handleSignOut() {
   selectedName = null;
   selectedTime = null;
   selectedDestination = '';
+  selectedDietary = '';
   selectedPhotoURL = null;
   pendingPhotoURL = null;
   document.getElementById('user-pill-actions').style.display = 'none';
@@ -1566,6 +1572,7 @@ let selectedTime = null;
 let selectedDay = null; // Date object for the selected day
 let passengers = []; // kept in sync by the real-time listener below
 let selectedDestination = '';
+let selectedDietary = '';
 let selectedPhotoURL = null; // custom uploaded photo for current user
 let pendingPhotoURL = null;  // photo staged in the edit screen before saving
 
@@ -1583,6 +1590,9 @@ TIMES.forEach(t => {
 // ── Selection handlers ────────────────────────────────────────────
 document.getElementById('destination-input').addEventListener('input', e => {
   selectedDestination = e.target.value.trim();
+});
+document.getElementById('dietary-input').addEventListener('input', e => {
+  selectedDietary = e.target.value.trim();
 });
 
 function selectTime(t) {
@@ -1657,6 +1667,7 @@ function handleBoard() {
       destination: selectedDestination,
       boardedAt: Date.now()
     };
+    if (selectedDietary) record.dietary = selectedDietary;
     if (selectedPhotoURL) record.photoURL = selectedPhotoURL;
     passengersRef().child(key).set(record);
   }
@@ -1806,18 +1817,21 @@ function updatePageForDay() {
   const subtitle  = document.getElementById('main-subtitle');
   const timeField = document.getElementById('time-field');
 
-  const destField = document.getElementById('destination-field');
+  const destField    = document.getElementById('destination-field');
+  const dietaryField = document.getElementById('dietary-field');
   if (isTeamLunch) {
     heading.innerHTML = 'Team lunch day! 🥳';
     subtitle.textContent = "Company is ordering food to the office — it's on us. Let us know you're joining!";
-    if (timeField) timeField.style.display = 'none';
-    if (destField) destField.style.display = 'none';
+    if (timeField)    timeField.style.display    = 'none';
+    if (destField)    destField.style.display    = 'none';
+    if (dietaryField) dietaryField.style.display = '';
     selectedTime = '12:30'; // fixed for team lunch
   } else {
     heading.innerHTML = getDynamicHeading(selectedName);
     subtitle.textContent = "Let the team know you're heading out for lunch — choose a departure time and we'll hold your seat.";
-    if (timeField) timeField.style.display = '';
-    if (destField) destField.style.display = '';
+    if (timeField)    timeField.style.display    = '';
+    if (destField)    destField.style.display    = '';
+    if (dietaryField) dietaryField.style.display = 'none';
     // clear selectedTime if it was forced to 12:30
     if (selectedTime === '12:30' && !document.querySelector('.time-btn.selected')) {
       selectedTime = null;
