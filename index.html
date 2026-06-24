@@ -1443,9 +1443,13 @@ document.getElementById('guest-back-btn').addEventListener('click', () => {
   showAuthState('signin');
 });
 
-function confirmGuest() {
+async function confirmGuest() {
   const name = document.getElementById('guest-name-input').value.trim();
   if (!name) return;
+  // Sign in anonymously so Firebase database rules (auth != null) are satisfied
+  if (!auth.currentUser) {
+    try { await auth.signInAnonymously(); } catch (e) { /* proceed anyway */ }
+  }
   applyProfile({ displayName: name, guest: true });
 }
 document.getElementById('guest-confirm-btn').addEventListener('click', confirmGuest);
